@@ -36,12 +36,17 @@ public class ComBotLauncher {
 				autoDownload = false;
 			}
 		} else {
-			checkForUpdate = true;
-			autoDownload = true;
+			//Check for update is either null, or it's false
 			if(config.get("check-update") != null) {
+				//If it isn't null, it's false
 				System.out.println("You have opted out of checking for an update.");
+				checkForUpdate = false;
+				autoDownload = false;
 			} else {
+				//It's null, meaning it doesn't exist, meaning there's most likely nothing there
 				System.out.println("You seem to be missing\ncheck-update and auto-download-update\nin your conifg file. I'll set those to true for now, but be sure to add them to your file later.");
+				checkForUpdate = true;
+				autoDownload = true;
 			}
 		}
 		System.out.println("Check for update: " + checkForUpdate + "\nAuto-download: " + autoDownload + "\n");
@@ -54,7 +59,7 @@ public class ComBotLauncher {
 			if(currentVersion != null && version.compareToIgnoreCase(currentVersion) > 0) {
 				//Version is newer
 				System.out.println("Found that the most recommended version " + version + " is higher than your current version: " + currentVersion);
-				versionToLoad = version;
+			//	versionToLoad = version;
 			} else if (currentVersion != null){
 				versionToLoad = currentVersion;
 				System.out.println("Using current version");
@@ -96,14 +101,19 @@ public class ComBotLauncher {
 					System.out.println("Download failure");
 					versionToLoad = currentVersion;
 				}
+			} else {
+				//Dont download
+				versionToLoad = currentVersion;
 			}
 			jarToLoad = "ComBot.v" + versionToLoad + ".jar";
+		} else {
+			jarToLoad = "ComBot.v" + checkCurrentVersion() + ".jar";
 		}
 		if(!jarToLoad.equals("")) {
 			System.out.println("Starting bot..." + jarToLoad);
 			loadComBot(new File((System.getProperty("user.home") + File.separatorChar + "ComBot" + File.separatorChar + "settings" + File.separatorChar + "versions" + File.separatorChar + jarToLoad)));
 		} else {
-			System.out.println("Couldn't find jar to load. Trying running the bot directly.\nType the following into your command line: java -jar path/to/bot.jar");
+			System.out.println("Couldn't find jar to load (There was no jar specified). Trying running the bot directly.\nType the following into your command line: java -jar path/to/bot.jar");
 		}
 	}
 	
