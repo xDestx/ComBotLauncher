@@ -110,7 +110,7 @@ public class ComBotLauncher {
 	private static String getMOTD() {
 		String motd = "Message of the Day: ";
 		try {
-			URL motdURL = new URL("https://plugin-combot.firebaseio.com/MOTD.json");
+			URL motdURL = new URL("https://plugin-combot.firebaseio.com/MOTD/0.json");
 			String msg = "";
 			Scanner s = new Scanner(motdURL.openStream());
 			while(s.hasNextLine()) {
@@ -136,9 +136,8 @@ public class ComBotLauncher {
 		try {
 			JarFile jar = new JarFile(f);
 			URL loc = f.toURI().toURL();
-			URLClassLoader loader = new URLClassLoader(new URL[] { loc });
+			URLClassLoader loader = new URLClassLoader(new URL[] { loc }, Thread.currentThread().getContextClassLoader());
 			Class<?> launcherClass = loader.loadClass("com.mdc.combot.BotLauncher");
-			
 			Enumeration<JarEntry> entries = jar.entries();
 			while (entries.hasMoreElements()) {
 				JarEntry entry = entries.nextElement();
@@ -146,9 +145,11 @@ public class ComBotLauncher {
 					loader.loadClass(entry.getName().replace(".class", "").replace("/","."));
 				}
 			}
-			loader.close();
 			jar.close();
+			Thread.currentThread().setContextClassLoader(loader);
 			launcherClass.getMethod("main", String[].class).invoke(null, (Object)new String[0]);
+
+			loader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
