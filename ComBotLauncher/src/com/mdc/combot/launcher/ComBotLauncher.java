@@ -25,6 +25,9 @@ public class ComBotLauncher {
 		Map<String,String> config = getConfig();
 		boolean checkForUpdate;
 		boolean autoDownload;
+		
+		System.out.println("\n====================\nMOTD: " + getMOTD() + "\n====================");
+		
 		if(config.get("check-update") != null && Boolean.parseBoolean(config.get("check-update"))) {
 			checkForUpdate = true;
 			if(config.get("auto-download-update") != null && Boolean.parseBoolean(config.get("auto-download-update"))) {
@@ -33,12 +36,12 @@ public class ComBotLauncher {
 				autoDownload = false;
 			}
 		} else {
-			checkForUpdate = false;
-			autoDownload = false;
+			checkForUpdate = true;
+			autoDownload = true;
 			if(config.get("check-update") != null) {
 				System.out.println("You have opted out of checking for an update.");
 			} else {
-				System.out.println("You seem to be missing\ncheck-update     and\nauto-download-update\nin your conifg file.");
+				System.out.println("You seem to be missing\ncheck-update and auto-download-update\nin your conifg file. I'll set those to true for now, but be sure to add them to your file later.");
 			}
 		}
 		System.out.println("Check for update: " + checkForUpdate + "\nAuto-download: " + autoDownload + "\n");
@@ -72,7 +75,7 @@ public class ComBotLauncher {
 					}
 				}
 			}
-			if(autoDownload && !currentVersion.equals(version)) {
+			if((autoDownload && currentVersion == null) || (autoDownload && !currentVersion.equals(version))) {
 				//Download
 				System.out.println("Downloading recommended version");
 				File destinationFile = new File((System.getProperty("user.home") + File.separatorChar + "ComBot" + File.separatorChar + "settings" + File.separatorChar + "versions" + File.separatorChar + fullName));
@@ -100,8 +103,29 @@ public class ComBotLauncher {
 			System.out.println("Starting bot..." + jarToLoad);
 			loadComBot(new File((System.getProperty("user.home") + File.separatorChar + "ComBot" + File.separatorChar + "settings" + File.separatorChar + "versions" + File.separatorChar + jarToLoad)));
 		} else {
-			System.out.println("Couldn't find jar to load.");
+			System.out.println("Couldn't find jar to load. Trying running the bot directly.\nType the following into your command line: java -jar path/to/bot.jar");
 		}
+	}
+	
+	private static String getMOTD() {
+		String motd = "Message of the Day: ";
+		try {
+			URL motdURL = new URL("https://plugin-combot.firebaseio.com/MOTD.json");
+			String msg = "";
+			Scanner s = new Scanner(motdURL.openStream());
+			while(s.hasNextLine()) {
+				msg+=s.nextLine();
+			}
+			s.close();
+			motd+=msg.replace("\"", "");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+			motd+=" -- Sorry, unable to check MOTD";
+		} catch (IOException e) {
+			e.printStackTrace();
+			motd+=" -- Sorry, unable to check MOTD";
+		}
+		return motd;
 	}
 	
 	protected static void loadComBot(File f) {
@@ -125,7 +149,6 @@ public class ComBotLauncher {
 			}		
 			loader.close();
 			jar.close();
-
 			launcherClass.getMethod("main", String[].class).invoke(null, (Object)new String[0]);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -142,6 +165,11 @@ public class ComBotLauncher {
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
 		}
+			//try {
+		//		Runtime.getRuntime().exec("java -jar " + f.getAbsolutePath() + " &");
+		//	} catch (IOException e) {
+			//	e.printStackTrace();
+			//}
 	}
 	
 	private static String checkCurrentVersion() {
