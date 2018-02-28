@@ -143,8 +143,7 @@ public class ComBotLauncher {
 			while (entries.hasMoreElements()) {
 				JarEntry entry = entries.nextElement();
 				if (entry.getName().endsWith(".class")) {
-					loader.loadClass(entry.getName().replace(".class", "").replace("/", ".")
-							.replace("\\", ".").replace(":", "."));
+					loader.loadClass(entry.getName().replace(".class", "").replace("/","."));
 				}
 			}
 			loader.close();
