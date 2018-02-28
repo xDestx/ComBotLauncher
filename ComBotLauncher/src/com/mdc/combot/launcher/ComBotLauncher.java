@@ -146,7 +146,7 @@ public class ComBotLauncher {
 					loader.loadClass(entry.getName().replace(".class", "").replace("/", ".")
 							.replace("\\", ".").replace(":", "."));
 				}
-			}		
+			}
 			loader.close();
 			jar.close();
 			launcherClass.getMethod("main", String[].class).invoke(null, (Object)new String[0]);
